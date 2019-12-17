@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/libs.min.css">
+    <link rel="stylesheet" href="css/style.min.css">
+    <title>Matrix</title>
+</head>
+
+<body>
+
+    <div id="matrix">
+        <h1 class="matrix__title">{{title}}</h1>
+        <input type="text" class="matrix__input" v-on:input="inputRows" placeholder="Enter the number of rows">
+        <input type="text" class="matrix__input" v-on:input="inputColumns" placeholder="Enter the number of columns">
+        <button class="matrix__btn" v-on:click="createMatrix">Create matrix</button>
+
+        <div class="matrix__wrapper" v-html="matrix" ref="test">
+
+        </div>
+
+        <button class="matrix__btn" v-on:click.once="writeSumAndAverage">
+            Записать значения суммы и средние
+        </button>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script>
+
+
+        new Vue({
+            el: '#matrix',
+            data: {
+                title: 'Matrix',
+                rows: null,
+                columns: null,
+                matrixColumns: null,
+                matrix: null,
+                summ: 0,
+                cellNumber: 0,
+                counter: 0,
+                matrixAverage: null,
+                averageNumber: 0,
+                rowId: 0,
+                summId: 0,
+                averageId: 0,
+                counter1: 0,
+                counter2: 0,
+            },
+            methods: {
+                inputRows: function (event) {
+                    this.rows = event.target.value
+                },
+                inputColumns: function (event) {
+                    this.columns = event.target.value
+                },
+                createMatrix: function () {
+                    min = Math.ceil(100);
+                    max = Math.floor(999);
+                    this.counter = 0;
+                    this.rowId = 0;
+                    this.summId = 0;
+                    this.counter1 = 0;
+                    this.counter2 = 0;
+                    this.averageId = 0;
+                    for (let i = 0; i < this.rows; i++) {
+                        this.summ = 0;
+                        ++this.rowId;
+                        ++this.summId;
+                        for (let j = 0; j < this.columns; j++) {
+                            this.cellNumber = (Math.floor(Math.random() * (max - min)) + min);
+                            ++this.counter;
+                            if (j === 0) {
+                                this.matrixColumns = '<div class="matrix__cell" id="' + this.counter + '">' + this.cellNumber + '</div>'
+                            } else {
+                                this.matrixColumns += '<div class="matrix__cell" id="' + this.counter + '">' + this.cellNumber + '</div>'
+                            }
+                        }
+                        if (i === 0) {
+                            this.matrix = '<div class="matrix__row" id="row-' + this.rowId + '">' + this.matrixColumns + '<div class="matrix__summ" id="summ-' + this.summId + '">' + '</div>' + '</div>'
+                        } else {
+                            this.matrix += '<div class="matrix__row" id="row-' + this.rowId + '">' + this.matrixColumns + '<div class="matrix__summ" id="summ-' + this.summId + '">' + '</div>' + '</div>'
+                        }
+                    }
+                    for (let v = 1; v <= this.columns; v++) {
+                        ++this.averageId;
+                        if (v === 1) {
+                            this.matrixAverage = '<div class="matrix__average" id="average-' + this.averageId + '">' + '</div>'
+                        } else {
+                            this.matrixAverage += '<div class="matrix__average" id="average-' + this.averageId + '">' + '</div>'
+                        }
+                    }
+                    this.matrix += '<div class="matrix__row">' + this.matrixAverage + '</div>';
+                },
+                mounted() {
+                    // for (let i = 0; i < this.rows; i++) {
+                    //     for (let j = 0; j < this.columns; j++) {
+                    //         this.$refs['test'].childNodes[i].childNodes[j].addEventListener('click', function (event) {
+                    //             event.preventDefault();
+                    //             event.target.innerText++;
+                    //             event.target.parentNode.lastChild.innerText++;
+
+                    //             // середнє значення зробити
+                    //         })
+                    //     }
+                    // }
+
+                    for (let s = 0; s < this.$refs['test'].childNodes.length - 1; s++) {
+                        this.$refs['test'].childNodes[s].addEventListener('click', function (event) {
+                            if (event.target.id.startsWith("s")) { }
+                            else {
+                                event.preventDefault();
+                                event.target.innerText++;
+                                event.target.parentNode.lastChild.innerText++;
+                                for (let v = 0; v < event.target.parentNode.childNodes.length - 1; v++) {
+                                    console.log('sdfsdf');
+                                }
+                            }
+                        })
+                    }
+
+                    for (let i = 0; i < this.$refs['test'].childNodes.length - 1; i++) {
+                        this.$refs['test'].childNodes[i].addEventListener('mouseover', function (event) {
+                            if (event.target.id.startsWith("s")) { }
+                            else {                   
+                                for (let j = 0; j < event.target.parentNode.childNodes.length - 1; j++) {
+                                    console.log(event.target);
+                                    // event.target.parentNode.childNodes[j].classList.add('active');
+                                    // console.log(event.target.innerText - event.target.parentNode.childNodes[j].innerText)
+                                    if((event.target.innerText - event.target.parentNode.childNodes[j].innerText < 100 && event.target.innerText - event.target.parentNode.childNodes[j].innerText > 0)
+                                    || event.target.parentNode.childNodes[j].innerText - event.target.innerText < 100 && event.target.parentNode.childNodes[j].innerText - event.target.innerText > 0){
+                                        event.target.parentNode.childNodes[j].classList.add('active');
+                                    }
+
+                                    // console.log('sdfsdf');
+                                    // event.target.classList.add('active');
+                                }
+                            }
+                        })
+                    }
+
+                    // for (let i = 0; i < this.$refs['test'].childNodes.length - 1; i++) {
+                    //     this.$refs['test'].childNodes[i].addEventListener('mouseout', function (event) {
+                    //         console.log('sdfsdf');
+                    //         event.target.parentNode.childNodes[i].classList.remove('active');
+                    //         event.target.classList.remove('active');
+                    //     })
+                    // }
+
+                    // for (let i = 0; i < this.rows; i++) {
+                    //     for (let j = 0; j < this.columns; j++) {
+                    //         this.$refs['test'].childNodes[i].childNodes[j].addEventListener('mouseover', function (event) {
+                    //             event.preventDefault();
+                    //             for (let b = 0; b < this.rows; b++) {
+                    //                 for (let c = 0; c < this.columns; c++) {
+                    //                     this.$refs['test'].childNodes[b].childNodes[c].classList.add("active");
+                    //                 }
+                    //             }
+                    //         })
+                    //     }
+                    // }
+                },
+                writeSumAndAverage: function () {
+                    this.mounted();
+                    this.counter1 = 0;
+                    this.counter2 = 0;
+
+                    for (let h = 1; h <= this.rows; h++) {
+                        this.summ = 0;
+                        for (let k = 1; k <= this.columns; k++) {
+                            ++this.counter1;
+                            this.summ += Number(document.getElementById(this.counter1).innerText);
+                        }
+                        document.getElementById('summ-' + h).innerText = Number(this.summ);
+                    }
+                    for (let i = 1; i <= this.columns; i++) {
+                        this.averageNumber = 0;
+                        this.counter2 = i;
+                        for (let j = 1; j <= this.rows; j++) {
+                            this.averageNumber += Number(document.getElementById(this.counter2).innerText);
+                            if (j !== this.rows) {
+                                this.counter2 += Number(this.columns);
+                            }
+                        }
+                        document.getElementById('average-' + i).innerText = (Number(this.averageNumber) / this.rows).toFixed(0);
+                    }
+                },
+                up: function () {
+                    console.log('sdfsdf');
+                }
+            }
+        });
+
+
+    </script>
+    <!-- <script src="js/libs.min.js"></script>
+    <script src="js/main.js"></script> -->
+</body>
+
+</html>

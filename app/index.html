@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <link rel="stylesheet" href="css/libs.min.css">
+   <link rel="stylesheet" href="css/style.min.css">
+   <title>Matrix</title>
+</head>
+
+<body>
+
+   <div id="matrix">
+
+   </div>
+
+
+   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+   <script>
+
+      Vue.component('matrix-row', {
+         props: {
+            columns: Number,
+            rows: Number,
+         },
+         data() {
+            return {
+               counter: 0,
+               cellNumber: 0,
+               sum: 0,
+            }
+         },
+         template: `
+            <div class="matrix__row">
+               <matrix-cell v-for="c in columns" :cellNumber="generateRandomNumber()" :rows="rows" :columns="columns"></matrix-cell>
+               <matrix-sum :sum="sum" :columns="columns"></matrix-sum>
+            </div>`,
+         methods: {
+            generateRandomNumber() {
+               min = Math.ceil(100)
+               max = Math.floor(999)
+               this.cellNumber = (Math.floor(Math.random() * (max - min)) + min)
+               this.sum += this.cellNumber
+               return this.cellNumber
+            },
+         }
+      })
+
+      Vue.component('matrix-row-average', {
+         props: {
+            rows: Number,
+            columns: Number
+         },
+         data() {
+            return {
+               counter: -1
+            }
+         },
+         template: `
+            <div class="matrix__row">
+               <div class="matrix__average" v-for="c in columns">{{test(rows, columns)}}</div>
+            </div>`,
+         methods: {
+            test(rows, columns) {
+               let averageValue = 0;
+               ++this.counter
+               for (let i = this.counter; i < columns; i++) {
+                  for (let j = 0; j < rows; j++) {
+                     averageValue += Number(event.target.nextElementSibling.childNodes[j].childNodes[i].innerText)
+                  }
+                  averageValue /= columns
+                  return averageValue.toFixed(2)
+               }
+            }
+         },
+      })
+
+      Vue.component('matrix-cell', {
+         props: {
+            cellNumber: Number,
+            rows: Number,
+            columns: Number
+         },
+         data() {
+            return {
+               counter: -1,
+               cellNumberValue: this.cellNumber,
+            }
+         },
+         template: `
+            <div class="matrix__cell" @click="addNumber(rows, columns, $event)" @mouseover="backlightOn(rows, columns, $event)" @mouseleave="backlightOff(rows, columns, $event)">
+               {{ cellNumberValue }}
+            </div> 
+          `,
+         methods: {
+            addNumber(rows, columns) {
+               this.cellNumberValue++
+               // this.$emit('changeSum', this.cellNumberValue)
+               event.target.parentNode.lastChild.innerText++
+               // let averageValue = 0;
+               // ++this.counter
+               // for (let i = this.counter; i < columns; i++) {
+               //    for (let j = 0; j < rows; j++) {
+               //       averageValue += Number(event.target.parentNode.parentNode.childNodes[j].childNodes[i].innerText)
+               //       averageValue /= columns
+               //       event.target.parentNode.parentNode.lastChild.childNodes[i].innerText = averageValue.toFixed(2)
+               //    }
+               // }
+            },
+            backlightOn(rows, columns) {
+               for (let i = 0; i < rows; i++) {
+                  for (let j = 0; j < columns; j++) {
+                     if ((event.target.innerText - event.target.parentNode.parentNode.childNodes[i].childNodes[j].innerText < 100 && event.target.innerText - event.target.parentNode.parentNode.childNodes[i].childNodes[j].innerText > 0)
+                        || (event.target.parentNode.parentNode.childNodes[i].childNodes[j].innerText - event.target.innerText < 100 && event.target.parentNode.parentNode.childNodes[i].childNodes[j].innerText - event.target.innerText > 0)) {
+                        event.target.parentNode.parentNode.childNodes[i].childNodes[j].classList.add('active');
+                     }
+                  }
+               }
+            },
+            backlightOff(rows, columns) {
+               for (let i = 0; i < rows; i++) {
+                  for (let j = 0; j < columns; j++) {
+                     event.target.parentNode.parentNode.childNodes[i].childNodes[j].classList.remove('active');
+                  }
+               }
+            }
+         },
+      })
+
+      Vue.component('matrix-sum', {
+         props: {
+            sum: Number,
+            columns: Number
+         },
+         data() {
+            return {
+               counter: 0
+            }
+         },
+         template: `
+            <div class="matrix__summ" @changeSum="changeSum" @mouseover="percentsOn(columns, $event)" @mouseleave="percentsOff(columns, $event)">
+               {{ sum }}
+            </div> 
+          `,
+         methods: {
+            changeSum() {
+               this.sum++
+            },
+            percentsOn(columns) {
+               for (let i = 0; i < columns; i++) {
+                  let percent = Number(event.target.parentNode.childNodes[i].innerText) / Number(event.target.innerText) * 100
+                  event.target.parentNode.childNodes[i].style.background = 'linear-gradient(to top, #F95A39 0%, #F95A39 ' + percent + '%, #fff ' + percent + '%, #fff 100%)'
+               }
+            },
+            percentsOff(columns) {
+               for (let i = 0; i < columns; i++) {
+                  event.target.parentNode.childNodes[i].style.background = 'transparent'
+               }
+            }
+         }
+      })
+
+      new Vue({
+         el: '#matrix',
+         data: {
+            title: 'Matrix',
+            matrix: null,
+            rows: null,
+            columns: null,
+            createdMatrix: false,
+         },
+         template: `<div>
+               <h1 class="matrix__title">{{ title }}</h1>
+               <input type="text" class="matrix__input" @input="inputRows" placeholder="Enter the number of rows">
+               <input type="text" class="matrix__input" @input="inputColumns" placeholder="Enter the number of columns">
+               <button class="matrix__btn" @click="wasClicked">Create matrix</button>
+
+               <div class="matrix__wrapper">
+                  <matrix-row v-for="c in rows" v-if="createMatrix()" :columns="columns" :rows="rows"></matrix-row>
+                  <matrix-row-average v-if="createMatrix()" :columns="columns" :rows="rows"></matrix-row-average>
+               </div>
+               
+               <button class="matrix__btn" @click="addRow()">
+                  Add row
+               </button>
+               <button class="matrix__btn" @click="removeRow()">
+                  Remove row
+               </button>
+            </div>`,
+         methods: {
+            wasClicked() {
+               this.createdMatrix = true
+            },
+            createMatrix() {
+               if (this.createdMatrix) {
+                  return true
+               } else {
+                  return false
+               }
+            },
+            inputRows(event) {
+               this.rows = Number(event.target.value)
+            },
+            inputColumns(event) {
+               this.columns = Number(event.target.value)
+            },
+            addRow() {
+               this.rows += 1
+            },
+            removeRow(event) {
+               this.rows -= 1
+            }
+         },
+      })
+
+   </script>
+</body>
+
+</html>
